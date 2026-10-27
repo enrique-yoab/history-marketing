@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historia del Marketing - Mapa Conceptual</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+        * {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(100, 116, 139, 0.4);
+            border-radius: 9999px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.7);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 h-screen w-screen overflow-hidden flex flex-col select-none relative">
+
+    <!-- CABECERA PRINCIPAL -->
+    <header
+        class="h-16 border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between z-20 shrink-0">
+        <!-- Identidad y Título -->
+        <div class="flex items-center gap-3">
+            <div
+                class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-indigo-600 flex items-center justify-center shadow-md shadow-indigo-500/20 text-white font-bold text-lg shrink-0">
+                <i class="ph-bold ph-tree-structure"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-sm sm:text-base text-slate-100 tracking-tight leading-none">
+                    Historia del Marketing
+                </h1>
+                <p class="text-[11px] sm:text-xs text-slate-400 mt-1">
+                    Mapa conceptual interactivo
+                </p>
+            </div>
+        </div>
+
+        <!-- Acciones y Controles -->
+        <div class="flex items-center gap-2 sm:gap-2.5">
+            <!-- Buscador sutil -->
+            <div class="relative hidden lg:block">
+                <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                <input type="text" id="canvasSearchInput" placeholder="Buscar concepto..."
+                    class="bg-slate-950/70 border border-slate-800 hover:border-slate-700 text-xs rounded-xl pl-8 pr-3 py-1.5 w-44 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all placeholder:text-slate-500">
+            </div>
+
+            <!-- Botón Recorrido -->
+            <button id="btnHeaderTour" title="Iniciar recorrido guiado"
+                class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs flex items-center gap-1.5 shadow-sm shadow-indigo-600/20 transition active:scale-95">
+                <i class="ph-bold ph-play text-xs"></i>
+                <span class="hidden sm:inline">Recorrido</span>
+            </button>
+
+            <!-- Exportar Imagen PNG -->
+            <button id="btnExportPng" title="Exportar como imagen PNG"
+                class="px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/70 text-slate-200 font-medium text-xs flex items-center gap-1.5 transition">
+                <i class="ph-bold ph-download-simple text-sm"></i>
+                <span class="hidden md:inline">Exportar</span>
+            </button>
+
+            <div class="h-4 w-px bg-slate-800 mx-0.5 hidden sm:block"></div>
+
+            <!-- Botón Efectos de Sonido -->
+            <button id="btnToggleSound" title="Efectos de sonido"
+                class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/70 text-slate-400 hover:text-white transition">
+                <i id="soundIcon" class="ph-bold ph-speaker-slash text-base"></i>
+            </button>
+
+            <!-- Botón Re-centrar Vista -->
+            <button id="btnResetView" title="Re-centrar mapa"
+                class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/70 text-slate-300 hover:text-white transition">
+                <i class="ph-bold ph-arrows-out-cardinal text-base"></i>
+            </button>
+
+            <!-- Botón Guía / Ayuda -->
+            <button id="btnInfoModal" title="Atajos y controles"
+                class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/70 text-slate-300 hover:text-white transition">
+                <i class="ph-bold ph-question text-base"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- CONTENEDOR PRINCIPAL DEL CANVAS -->
+    <main class="flex-1 relative overflow-hidden bg-slate-950">
+        <!-- El elemento Canvas principal -->
+        <canvas id="mindmapCanvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+
+        <!-- BARRA FLOTANTE DE TOUR GUIADO Y PRESENTACIÓN -->
+        <div id="tourBar"
+            class="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 bg-slate-900/95 border border-indigo-500/40 px-3.5 py-2 rounded-2xl shadow-2xl backdrop-blur-md transition-all hidden">
+            <button id="btnTourPrev" class="p-1.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition disabled:opacity-30" title="Hito Anterior">
+                <i class="ph-bold ph-caret-left text-sm"></i>
+            </button>
+            <button id="btnTourPlayPause" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-600/30 transition">
+                <i id="tourPlayIcon" class="ph-bold ph-play text-xs"></i>
+                <span id="tourPlayText">Iniciar Tour</span>
+            </button>
+            <button id="btnTourNext" class="p-1.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition disabled:opacity-30" title="Siguiente Hito">
+                <i class="ph-bold ph-caret-right text-sm"></i>
+            </button>
+            <div class="h-4 w-px bg-slate-800 mx-1"></div>
+            <span id="tourStepIndicator" class="text-xs font-mono text-indigo-300">Hito 1 / 14</span>
+            <button id="btnCloseTour" class="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white ml-1" title="Cerrar barra de tour">
+                <i class="ph-bold ph-x text-xs"></i>
+            </button>
+        </div>
+
+        <!-- Barra de herramientas flotante de navegación y Zoom -->
+        <div
+            class="absolute bottom-6 left-6 z-10 flex flex-col gap-2 bg-slate-900/90 border border-slate-800 p-2 rounded-2xl shadow-2xl backdrop-blur-md">
+            <button id="zoomInBtn"
+                class="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-slate-800 text-slate-300 hover:text-white transition"
+                title="Acercar (Scroll Arriba)">
+                <i class="ph-bold ph-plus text-base"></i>
+            </button>
+            <button id="zoomOutBtn"
+                class="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-slate-800 text-slate-300 hover:text-white transition"
+                title="Alejar (Scroll Abajo)">
+                <i class="ph-bold ph-minus text-base"></i>
+            </button>
+            <div class="h-px bg-slate-800 mx-1"></div>
+            <button id="expandAllNodesBtn"
+                class="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-slate-800 text-slate-300 hover:text-white transition"
+                title="Desplegar todas las ramas">
+                <i class="ph-bold ph-arrows-out-simple text-base"></i>
+            </button>
+            <button id="collapseAllNodesBtn"
+                class="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-slate-800 text-slate-300 hover:text-white transition"
+                title="Colapsar a ramas principales">
+                <i class="ph-bold ph-arrows-in-simple text-base"></i>
+            </button>
+        </div>
+
+        <!-- Indicador de escala actual -->
+        <div
+            class="absolute bottom-6 left-24 z-10 hidden sm:flex items-center gap-2 bg-slate-900/80 border border-slate-800/90 px-3 py-1.5 rounded-xl text-xs text-slate-400 font-mono shadow-md backdrop-blur-md">
+            <i class="ph ph-magnifying-glass-plus text-indigo-400"></i>
+            <span id="zoomLevelText">100%</span>
+        </div>
+
+        <!-- Minimapa inferior derecho -->
+        <div
+            class="absolute bottom-6 right-6 z-10 hidden md:flex flex-col bg-slate-900/90 border border-slate-800 rounded-2xl p-2 shadow-2xl backdrop-blur-md">
+            <div
+                class="flex items-center justify-between text-[10px] text-slate-400 px-1 mb-1 font-mono uppercase tracking-wider">
+                <span>Minimapa</span>
+                <span class="text-indigo-400">Radar</span>
+            </div>
+            <canvas id="minimapCanvas" width="160" height="100"
+                class="rounded-xl border border-slate-800 bg-slate-950/80 cursor-pointer"></canvas>
+        </div>
+
+        <!-- Píldoras de épocas interactivas (superior izquierda) -->
+        <div id="eraPillsContainer"
+            class="absolute top-4 left-4 z-10 hidden xl:flex items-center gap-1.5 bg-slate-900/80 border border-slate-800/80 p-1.5 rounded-2xl text-xs backdrop-blur-md">
+            <button data-era="era_antigua" class="era-pill px-2.5 py-1 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 flex items-center gap-1.5 transition">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm shadow-amber-400/50"></span>
+                <span>Antigüedad</span>
+            </button>
+            <button data-era="era_medieval" class="era-pill px-2.5 py-1 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 flex items-center gap-1.5 transition">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50"></span>
+                <span>Edad Media</span>
+            </button>
+            <button data-era="era_cientifica" class="era-pill px-2.5 py-1 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 flex items-center gap-1.5 transition">
+                <span class="w-2.5 h-2.5 rounded-full bg-sky-400 shadow-sm shadow-sky-400/50"></span>
+                <span>Era Científica</span>
+            </button>
+            <button data-era="era_4ps_kotler" class="era-pill px-2.5 py-1 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 flex items-center gap-1.5 transition">
+                <span class="w-2.5 h-2.5 rounded-full bg-indigo-400 shadow-sm shadow-indigo-400/50"></span>
+                <span>4 Ps & Kotler</span>
+            </button>
+            <button data-era="era_digital_search" class="era-pill px-2.5 py-1 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 flex items-center gap-1.5 transition">
+                <span class="w-2.5 h-2.5 rounded-full bg-purple-400 shadow-sm shadow-purple-400/50"></span>
+                <span>Revolución Digital</span>
+            </button>
+            <button data-era="era_creadores_ia" class="era-pill px-2.5 py-1 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 flex items-center gap-1.5 transition">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-400 shadow-sm shadow-rose-400/50"></span>
+                <span>Creadores & IA</span>
+            </button>
+        </div>
+
+        <!-- DRAWER LATERAL DE DETALLES DEL NODO SELECCIONADO -->
+        <aside id="canvasDetailDrawer"
+            class="w-80 sm:w-96 border-l border-slate-800 bg-slate-900/95 backdrop-blur-xl flex flex-col transform translate-x-full transition-transform duration-300 ease-in-out absolute right-0 top-0 bottom-0 z-30 shadow-2xl">
+            <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span id="drawerBadge"
+                        class="text-xs px-2.5 py-1 rounded-lg font-mono font-bold tracking-wider uppercase bg-slate-800 text-slate-300 border border-slate-700">Nodo</span>
+                </div>
+                <button id="closeDetailDrawerBtn"
+                    class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center hover:bg-slate-700 transition">
+                    <i class="ph-bold ph-x"></i>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto flex-1 space-y-5">
+                <div>
+                    <span id="drawerCategory"
+                        class="text-xs font-semibold uppercase tracking-wider text-indigo-400 font-mono">Categoría</span>
+                    <h3 id="drawerTitle" class="text-xl font-bold text-slate-100 mt-1">Título del Concepto</h3>
+                    <p id="drawerPeriod" class="text-xs text-slate-400 mt-0.5">Periodo Histórico</p>
+                </div>
+
+                <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800 text-sm text-slate-300 leading-relaxed"
+                    id="drawerDescription">
+                    Descripción del hito registrado.
+                </div>
+
+                <div>
+                    <h4
+                        class="text-xs font-semibold uppercase text-slate-400 tracking-wider mb-2 flex items-center gap-1.5">
+                        <i class="ph-bold ph-sparkle text-amber-400"></i> Puntos Clave y Aprendizajes
+                    </h4>
+                    <ul id="drawerKeyPoints" class="space-y-2 text-sm text-slate-300">
+                        <!-- Puntos dinámicos -->
+                    </ul>
+                </div>
+
+                <div id="drawerQuoteBox" class="bg-indigo-950/30 border border-indigo-800/40 p-4 rounded-xl">
+                    <span class="text-xs font-semibold text-indigo-300 block mb-1 flex items-center gap-1">
+                        <i class="ph-fill ph-quotes"></i> Reflexión o Cita Clave:
+                    </span>
+                    <p id="drawerQuote" class="text-xs text-indigo-200/90 italic">
+                        "El marketing es el proceso social de crear e intercambiar valor."
+                    </p>
+                </div>
+            </div>
+
+            <div
+                class="p-4 border-t border-slate-800 bg-slate-950/50 text-xs text-slate-400 flex justify-between items-center">
+                <span>Documental de referencia</span>
+                <a id="drawerVideoLink" href="https://youtu.be/XBywDSGuKAw" target="_blank" rel="noopener noreferrer"
+                    class="text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5 font-medium bg-indigo-500/10 hover:bg-indigo-500/20 px-3 py-1.5 rounded-lg border border-indigo-500/30 transition">
+                    <i class="ph-bold ph-play-circle text-rose-500 text-sm"></i>
+                    <span>Ver en YouTube</span>
+                    <i class="ph ph-arrow-square-out text-xs"></i>
+                </a>
+            </div>
+        </aside>
+
+    </main>
+
+    <!-- MODAL DE AYUDA Y GUÍA DE INTERACCIÓN -->
+    <div id="canvasHelpModal"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 max-w-lg w-full rounded-2xl shadow-2xl p-6 relative">
+            <button id="closeHelpModalBtn"
+                class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg">
+                <i class="ph-bold ph-x text-lg"></i>
+            </button>
+            <div class="flex items-center gap-3 mb-4">
+                <div
+                    class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl">
+                    <i class="ph-bold ph-hand-pointing"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-slate-100">Controles del Canvas</h3>
+                    <p class="text-xs text-slate-400">Guía de navegación del mapa mental interactivo</p>
+                </div>
+            </div>
+            <div class="space-y-3 text-xs text-slate-300 mb-5">
+                <div class="flex items-center gap-3 p-2 rounded-xl bg-slate-950 border border-slate-800">
+                    <i class="ph-bold ph-cursor-click text-indigo-400 text-base"></i>
+                    <span><strong>Clic en un nodo:</strong> Abre la ficha de análisis y lecciones del documental.</span>
+                </div>
+                <div class="flex items-center gap-3 p-2 rounded-xl bg-slate-950 border border-slate-800">
+                    <i class="ph-bold ph-plus-circle text-amber-400 text-base"></i>
+                    <span><strong>Clic en botón (+) / (-):</strong> Despliega o repliega ramas hijas para despejar la
+                        vista.</span>
+                </div>
+                <div class="flex items-center gap-3 p-2 rounded-xl bg-slate-950 border border-slate-800">
+                    <i class="ph-bold ph-arrows-out-cardinal text-emerald-400 text-base"></i>
+                    <span><strong>Arrastrar el lienzo:</strong> Desplázate fluidamente por todo el árbol genealógico del
+                        marketing.</span>
+                </div>
+                <div class="flex items-center gap-3 p-2 rounded-xl bg-slate-950 border border-slate-800">
+                    <i class="ph-bold ph-arrows-in-simple text-purple-400 text-base"></i>
+                    <span><strong>Rueda del ratón / Pellizcar:</strong> Zoom in / Zoom out en tiempo real con punto
+                        focal dinámico.</span>
+                </div>
+            </div>
+            <button id="gotItHelpBtn"
+                class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl text-sm transition shadow-lg shadow-indigo-600/30">
+                Comenzar a explorar
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // 1. ÁRBOL DE DATOS COMPLETO DEL DOCUMENTAL (ADMINISTRACIÓN EN LÍNEA)
+        // =========================================================================
+        const rawMarketingTree = {
+            id: "root",
+            title: "HISTORIA DEL MARKETING",
+            category: "Eje Central",
+            period: "De la Antigüedad a la IA",
+            color: "#6366f1",
+            collapsed: false,
+            videoTime: 0,
+            description: "Un recorrido por la evolución del marketing: desde los primeros intercambios y carteles en papiro para sobrevivir en el comercio, hasta convertirse en una disciplina que busca entender las necesidades de las personas y crear conexiones reales.",
+            keyPoints: [
+                "El marketing no es vender por vender a presión; se trata de entender lo que la gente necesita y ofrecer valor real.",
+                "La publicidad es solo la parte visible de una estrategia mucho más profunda (producto, distribución, precio y experiencia).",
+                "Las herramientas cambian (del papiro a los algoritmos e IA), pero el deseo humano de conectar y resolver problemas sigue siendo el mismo."
+            ],
+            quote: "El objetivo del marketing es conocer y entender al cliente tan bien que el producto o servicio se venda solo. — Peter Drucker",
+            children: [
+                {
+                    id: "era_antigua",
+                    title: "1. Primeros pasos en la Antigüedad",
+                    category: "Edad Antigua",
+                    period: "3000 a.C. — Siglo I d.C.",
+                    color: "#f59e0b",
+                    collapsed: false,
+                    videoTime: 0,
+                    description: "Mucho antes de que existieran los libros de negocios, comerciantes y artesanos ya ideaban formas creativas de llamar la atención y resolver necesidades cotidianas en sus ciudades.",
+                    keyPoints: [
+                        "Primeros anuncios escritos combinando necesidades cotidianas con promociones comerciales.",
+                        "Aparición de negocios pensados para resolver problemas concretos de la vida urbana, como la comida rápida en Roma."
+                    ],
+                    children: [
+                        {
+                            id: "hapu_tejedor",
+                            title: "Hapu, el tejedor de Tebas",
+                            category: "Egipto (~3000 a.C.)",
+                            period: "Antiguo Egipto",
+                            color: "#fbbf24",
+                            videoTime: 133,
+                            description: "Uno de los papiros más antiguos conservados. Hapu buscaba a un tejedor fugitivo y ofrecía una moneda de oro, pero remataba el anuncio invitando a visitar su tienda por 'las mejores telas al gusto de cada cliente'.",
+                            keyPoints: [
+                                "Uso de una noticia de interés común como gancho para atraer clientes a su negocio.",
+                                "Una de las primeras promesas de personalización: ofrecer telas 'al gusto de cada quien'.",
+                                "Demuestra que el ingenio publicitario nació prácticamente junto con la escritura."
+                            ],
+                            quote: "Se ofrece una pieza de oro a quien informe sobre el paradero del esclavo... y para las telas más exquisitas, la tienda de Hapu el tejedor."
+                        },
+                        {
+                            id: "pompeya_nicias",
+                            title: "Los termopolios de Pompeya",
+                            category: "Roma Clásica (Siglo I d.C.)",
+                            period: "Pompeya, Roma Clásica",
+                            color: "#fbbf24",
+                            videoTime: 363,
+                            description: "Los termopolios eran los puestos de comida al paso romanos. Dueños como Nicias vieron una oportunidad clara: la gente común vivía en cuartos sin cocina y necesitaba comer caliente rápido y a buen precio.",
+                            keyPoints: [
+                                "Resolver un problema real: atender a una población sin espacio para cocinar en sus viviendas.",
+                                "Ubicación estratégica en esquinas concurridas para captar el paso de trabajadores y viajeros.",
+                                "Mostradores con tinajas empotradas y letreros llamativos para antojar a simple vista."
+                            ],
+                            quote: "Antes que una simple venta de comida, fue entender el estilo de vida urbano y ofrecer una solución práctica al día a día."
+                        }
+                    ]
+                },
+                {
+                    id: "era_medieval",
+                    title: "2. Edad Media y Renacimiento",
+                    category: "Siglos XII — XVIII",
+                    period: "Gremios e Imprenta",
+                    color: "#10b981",
+                    collapsed: false,
+                    videoTime: 550,
+                    description: "Con ciudades creciendo y una población mayoritariamente analfabeta, los oficios tuvieron que inventar una identidad visual directa para que cualquiera pudiera reconocer sus servicios.",
+                    keyPoints: [
+                        "Símbolos visuales en fachadas que hablaban por sí solos sin necesidad de saber leer.",
+                        "La llegada de la imprenta abrió por fin la posibilidad de compartir mensajes a gran escala."
+                    ],
+                    children: [
+                        {
+                            id: "poste_barbero",
+                            title: "El poste tricolor del barbero",
+                            category: "Gremios Medievales",
+                            period: "Edad Media",
+                            color: "#34d399",
+                            videoTime: 618,
+                            description: "Los barberos de entonces hacían tanto cortes de cabello como cirugías menores y extracciones dentales. El poste con franjas rojas y blancas simbolizaba la sangre y los vendajes limpios, convirtiéndose en un logotipo universal.",
+                            keyPoints: [
+                                "Identidad visual inmediata: un símbolo 3D que se distinguía desde lejos en calles ruidosas.",
+                                "Servicios combinados: de cuidado personal a curaciones básicas de salud.",
+                                "Un ícono comercial tan potente que se sigue usando y reconociendo siglos después."
+                            ],
+                            quote: "Cuando casi nadie sabía leer, un poste de colores bastaba para que toda la aldea supiera qué servicio había ahí."
+                        },
+                        {
+                            id: "imprenta_gutenberg",
+                            title: "La imprenta y los primeros carteles",
+                            category: "1450 — Siglo XVIII",
+                            period: "Revolución Impresa",
+                            color: "#34d399",
+                            videoTime: 893,
+                            description: "La invención de los tipos móviles por Gutenberg permitió multiplicar textos rápidamente. Esto dio origen a los volantes informativos y a los primeros carteles en paredes, cambiando la forma de anunciar productos.",
+                            keyPoints: [
+                                "Dejar atrás al pregonero que gritaba en la plaza para pasar a hojas impresas que circulaban de mano en mano.",
+                                "Las calles y muros de las ciudades se convirtieron en las primeras vitrinas publicitarias públicas.",
+                                "Nace formalmente la competencia de marcas en el espacio público."
+                            ],
+                            quote: "La imprenta multiplicó el conocimiento y, a la vez, inauguró la comunicación comercial masiva."
+                        }
+                    ]
+                },
+                {
+                    id: "era_cientifica",
+                    title: "3. Del oficio a la disciplina científica",
+                    category: "Siglo XX Temprano",
+                    period: "1902 — 1950",
+                    color: "#0ea5e9",
+                    collapsed: false,
+                    videoTime: 1000,
+                    description: "Con la Revolución Industrial y las fábricas produciendo a gran escala, vender ya no era cuestión de suerte o labia: hacía falta estudiar los mercados, la logística y las conductas de compra.",
+                    keyPoints: [
+                        "Primeros cursos universitarios dedicados exclusivamente al estudio del mercado.",
+                        "Aplicación de métodos estadísticos y logística para organizar la distribución nacional."
+                    ],
+                    children: [
+                        {
+                            id: "fred_clark",
+                            title: "Fred Clark: Estructurando el Marketing",
+                            category: "Pionero Académico",
+                            period: "Años 20",
+                            color: "#38bdf8",
+                            videoTime: 1103,
+                            description: "Fred E. Clark publicó 'Principles of Marketing', una de las primeras obras en ordenar metódicamente cómo funcionan la distribución, el almacenamiento, el financiamiento y los riesgos en el comercio.",
+                            keyPoints: [
+                                "Identificó que producir es solo la mitad del trabajo; la otra mitad es llevar el producto eficientemente a quien lo busca.",
+                                "Ayudó a dar forma a las primeras asociaciones y revistas de investigación comercial.",
+                                "Transformó la experiencia empírica de ventas en un campo de estudio formal para empresas."
+                            ],
+                            quote: "Vender bien no era un truco de magia, sino un proceso organizado con reglas claras de distribución y valor."
+                        },
+                        {
+                            id: "posguerra_operaciones",
+                            title: "La posguerra y el consumo masivo",
+                            category: "Años 40 y 50",
+                            period: "Posguerra",
+                            color: "#38bdf8",
+                            videoTime: 1270,
+                            description: "Tras la Segunda Guerra Mundial, las técnicas de investigación operativa y logística se aplicaron a la vida civil. Con el crecimiento de las familias y la clase media, nacieron las grandes marcas de consumo del hogar.",
+                            keyPoints: [
+                                "Primeros estudios formales sobre psicología del consumidor y hábitos de compra familiar.",
+                                "Uso masivo de la radio y la televisión para instalar marcas en la mente colectiva.",
+                                "La logística militar se adaptó para abastecer supermercados y tiendas en todo el país."
+                            ],
+                            quote: "La capacidad industrial de la guerra encontró en los hogares y el bienestar cotidiano su mayor mercado."
+                        }
+                    ]
+                },
+                {
+                    id: "era_4ps_kotler",
+                    title: "4. Las 4 Ps y la visión estratégica",
+                    category: "Consolidación Teórica",
+                    period: "1960 — 1980",
+                    color: "#818cf8",
+                    collapsed: false,
+                    videoTime: 1380,
+                    description: "El marketing se consolidó como una pieza clave de la administración empresarial gracias a modelos sencillos de recordar y a autores que pusieron al consumidor en el centro.",
+                    keyPoints: [
+                        "El modelo de las 4 Ps de McCarthy organiza las decisiones operativas de cualquier negocio.",
+                        "Philip Kotler enseña que el marketing empieza mucho antes de fabricar: empieza investigando necesidades."
+                    ],
+                    children: [
+                        {
+                            id: "mccarthy_4ps",
+                            title: "Jerome McCarthy: El modelo de las 4 Ps",
+                            category: "Marketing Mix",
+                            period: "Años 60",
+                            color: "#a5b4fc",
+                            videoTime: 1420,
+                            description: "McCarthy agrupó las variables que una empresa puede controlar en cuatro pilares: Producto (lo que ofreces), Precio (cuánto cobras y qué valor perciben), Plaza (dónde lo consiguen) y Promoción (cómo lo comunicas).",
+                            keyPoints: [
+                                "Producto: resolver un dolor real, cuidar el empaque y dar calidad diferencial.",
+                                "Precio: más que sumar costos, entender cuánto está dispuesta a pagar la gente por el beneficio.",
+                                "Plaza: canales y distribución para que comprar sea fácil y accesible.",
+                                "Promoción: el mensaje honesto y atractivo que conecta con el cliente indicado."
+                            ],
+                            quote: "Tener un gran producto no basta si nadie sabe que existe, si está mal distribuido o si su precio no hace sentido."
+                        },
+                        {
+                            id: "philip_kotler_hito",
+                            title: "Philip Kotler: Crear e intercambiar valor",
+                            category: "Referente Global",
+                            period: "Consolidación Moderna",
+                            color: "#a5b4fc",
+                            videoTime: 1452,
+                            description: "Considerado el padre del marketing moderno, Kotler insistió en que el objetivo no es engañar a la gente para que compre una vez, sino construir relaciones duraderas creando soluciones que realmente mejoren su vida.",
+                            keyPoints: [
+                                "Aclaró que el marketing no es solo hacer publicidad, sino definir toda la experiencia que rodea al servicio.",
+                                "El caso de marcas como Starbucks: no solo venden café, ofrecen un espacio cómodo y acogedor (el tercer lugar).",
+                                "Cuidar y fidelizar a un cliente frecuente cuesta mucho menos que salir a cazar clientes nuevos todo el tiempo."
+                            ],
+                            quote: "El marketing es el arte de crear valor genuino ante los clientes y recibir valor de ellos a cambio."
+                        }
+                    ]
+                },
+                {
+                    id: "era_digital_search",
+                    title: "5. La Revolución Digital y los Buscadores",
+                    category: "Era de Internet",
+                    period: "1994 — 2015",
+                    color: "#c084fc",
+                    collapsed: false,
+                    videoTime: 1750,
+                    description: "Internet cambió las reglas del juego: las personas dejaron de esperar pasivamente los anuncios de televisión y empezaron a buscar activamente lo que querían cuando lo necesitaban.",
+                    keyPoints: [
+                        "Del anuncio que interrumpe la serie al anuncio útil que responde a lo que buscas en Google.",
+                        "Posibilidad de medir en tiempo real clics, visitas y ventas con presupuestos accesibles."
+                    ],
+                    children: [
+                        {
+                            id: "backrub_google",
+                            title: "De BackRub a Google: El marketing de intención",
+                            category: "Buscadores Web",
+                            period: "Finales de los 90",
+                            color: "#d8b4fe",
+                            videoTime: 1802,
+                            description: "Con el algoritmo PageRank y luego Google AdWords, la publicidad dio un giro de 180 grados: en vez de lanzar mensajes a ciegas, el anuncio aparece justo en el segundo en que alguien teclea una necesidad.",
+                            keyPoints: [
+                                "Permitió a pequeños negocios competir de igual a igual pagando solo cuando alguien hace clic (CPC).",
+                                "El valor de la intención: quien busca 'reparar cerradura' ya tiene una necesidad urgente que resolver.",
+                                "Métricas claras: adiós a adivinar cuánta gente vio un cartel en la calle."
+                            ],
+                            quote: "Google no te interrumpe para venderte algo; aparece para ayudarte justo cuando tienes una duda o problema."
+                        },
+                        {
+                            id: "social_media_bigdata",
+                            title: "Redes Sociales: Conexión y Audiencias",
+                            category: "Plataformas Digitales",
+                            period: "Años 2000 — 2010",
+                            color: "#d8b4fe",
+                            videoTime: 2055,
+                            description: "Plataformas como Facebook, YouTube y más tarde TikTok cambiaron la forma de interactuar. Pasamos de buscar información a consumir contenido personalizado según gustos, amigos e intereses compartidos.",
+                            keyPoints: [
+                                "Cada red creció de forma distinta: Facebook uniendo amigos, YouTube democratizando el video y TikTok con el scroll infinito.",
+                                "Capacidad de segmentar anuncios con gran detalle según gustos e intereses reales de las personas.",
+                                "Adaptación constante: de simples fotos y muros a tiendas en línea y comunidades de creadores."
+                            ],
+                            quote: "Las redes demostraron que la gente no entra a internet a ver publicidad, entra a entretenerse y conectar con otros."
+                        }
+                    ]
+                },
+                {
+                    id: "era_creadores_ia",
+                    title: "6. Creadores de Contenido y el Futuro con IA",
+                    category: "Frontera Actual",
+                    period: "Presente y Futuro",
+                    color: "#f43f5e",
+                    collapsed: false,
+                    videoTime: 2200,
+                    description: "Hoy en día confiamos más en personas que nos inspiran que en marcas frías. Al mismo tiempo, la Inteligencia Artificial automatiza tareas mecánicas, obligándonos a enfocarnos en lo verdaderamente humano.",
+                    keyPoints: [
+                        "La economía de creadores: comunidades sólidas basadas en la empatía y la cercanía.",
+                        "La IA como aliada para agilizar el trabajo, pero donde la empatía, el criterio y la ética siguen siendo irreemplazables."
+                    ],
+                    children: [
+                        {
+                            id: "caso_mrbeast_eco",
+                            title: "La Economía de Creadores y Nuevas Marcas",
+                            category: "Nuevos Modelos",
+                            period: "Auge de Creadores",
+                            color: "#fb7185",
+                            videoTime: 2251,
+                            description: "Casos como MrBeast muestran que conectar genuinamente con una audiencia y darle buen entretenimiento permite lanzar productos propios (como chocolates o hamburguesas) compitiendo con gigantes de la industria.",
+                            keyPoints: [
+                                "Primero aportar diversión o conocimiento auténtico; la venta viene de forma natural después.",
+                                "Los creadores pasaron de recomendar marcas ajenas a construir sus propios proyectos y negocios.",
+                                "La confianza y la autenticidad son hoy la moneda más valiosa en cualquier mercado."
+                            ],
+                            quote: "La gente no le es leal a un logotipo abstracto; conecta con personas de carne y hueso con las que se identifica."
+                        },
+                        {
+                            id: "ia_reflexion_final",
+                            title: "¿Hacia dónde va el Marketing con la Inteligencia Artificial?",
+                            category: "Reflexión Final",
+                            period: "Nuevos Horizontes e IA",
+                            color: "#fb7185",
+                            videoTime: 2830,
+                            description: "La tecnología sigue evolucionando a pasos agigantados. La IA puede redactar textos, editar imágenes o predecir patrones en segundos, pero la empatía para entender qué siente y necesita una persona seguirá siendo humana.",
+                            keyPoints: [
+                                "Las herramientas van y vienen (de la imprenta a la IA), pero la esencia del intercambio y la ayuda mutua no cambia.",
+                                "El verdadero valor de quien estudia marketing está en tener criterio, ética y sensibilidad social.",
+                                "Aprender marketing hoy no es memorizar botones de una red social, sino aprender a resolver problemas de la gente."
+                            ],
+                            quote: "Mientras existan personas con necesidades por resolver y proyectos con ganas de ayudar, el marketing seguirá existiendo."
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // =========================================================================
+        // 2. MOTOR DEL CANVAS: ESTADO, AUDIO Y VARIABLES GLOBALES
+        // =========================================================================
+        const canvas = document.getElementById("mindmapCanvas");
+        const ctx = canvas.getContext("2d");
+        const minimapCanvas = document.getElementById("minimapCanvas");
+        const minimapCtx = minimapCanvas.getContext("2d");
+
+        // Dimensiones y transformación con Interpolación Suave (Lerp)
+        let viewWidth = window.innerWidth;
+        let viewHeight = window.innerHeight - 64;
+
+        // Coordenadas actuales y objetivo (para transiciones cinemáticas fluidas)
+        const transform = { x: 140, y: viewHeight / 2, scale: 0.85 };
+        const targetTransform = { x: 140, y: viewHeight / 2, scale: 0.85 };
+
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
+        let hoveredNode = null;
+        let selectedNode = null;
+        let searchTerm = "";
+
+        // Dimensiones fijas de tarjetas en el Canvas
+        const CARD_WIDTH = 250;
+        const CARD_HEIGHT = 82;
+        const HORIZONTAL_GAP = 120;
+        const VERTICAL_SPACING = 30;
+
+        // Partículas ambientales de fondo para dar atmósfera viva
+        const particles = Array.from({ length: 50 }, () => ({
+            x: Math.random() * 3200 - 600,
+            y: Math.random() * 3200 - 600,
+            radius: Math.random() * 1.6 + 0.5,
+            alpha: Math.random() * 0.35 + 0.1,
+            vx: (Math.random() - 0.5) * 0.18,
+            vy: (Math.random() - 0.5) * 0.18
+        }));
+
+        // Sistema de Audio UI Sintetizado (Web Audio API nativo)
+        let soundEnabled = false;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playTone(freq, type = 'sine', duration = 0.08, gainVal = 0.04) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        const btnToggleSound = document.getElementById("btnToggleSound");
+        const soundIcon = document.getElementById("soundIcon");
+        btnToggleSound.addEventListener("click", () => {
+            soundEnabled = !soundEnabled;
+            if (soundEnabled) {
+                initAudio();
+                playTone(660, 'triangle', 0.12, 0.06);
+                soundIcon.className = "ph-bold ph-speaker-high text-lg text-emerald-400";
+                btnToggleSound.classList.replace("text-slate-400", "text-emerald-400");
+                btnToggleSound.classList.add("border-emerald-500/40");
+            } else {
+                soundIcon.className = "ph-bold ph-speaker-slash text-lg text-slate-400";
+                btnToggleSound.classList.replace("text-emerald-400", "text-slate-400");
+                btnToggleSound.classList.remove("border-emerald-500/40");
+            }
+        });
+
+        // =========================================================================
+        // 3. CALCULO DE LAYOUT Y POSICIONES (ÁRBOL HORIZONTAL)
+        // =========================================================================
+        function computeNodeHeights(node) {
+            if (node.collapsed || !node.children || node.children.length === 0) {
+                node.subtreeHeight = CARD_HEIGHT;
+                return node.subtreeHeight;
+            }
+            let total = 0;
+            node.children.forEach(child => {
+                total += computeNodeHeights(child);
+            });
+            total += (node.children.length - 1) * VERTICAL_SPACING;
+            node.subtreeHeight = Math.max(CARD_HEIGHT, total);
+            return node.subtreeHeight;
+        }
+
+        function layoutTree(node, depth = 0, currentTopY = 0) {
+            node.depth = depth;
+            node.width = CARD_WIDTH;
+            node.height = CARD_HEIGHT;
+            node.x = depth * (CARD_WIDTH + HORIZONTAL_GAP);
+
+            const availableHeight = node.subtreeHeight || CARD_HEIGHT;
+            node.y = currentTopY + availableHeight / 2 - CARD_HEIGHT / 2;
+
+            // Botón interactivo de colapsar / expandir (+ / -)
+            if (node.children && node.children.length > 0) {
+                node.toggleBtn = {
+                    x: node.x + node.width - 24,
+                    y: node.y + node.height / 2,
+                    radius: 11
+                };
+            } else {
+                node.toggleBtn = null;
+            }
+
+            if (!node.collapsed && node.children && node.children.length > 0) {
+                let childY = currentTopY;
+                node.children.forEach(child => {
+                    layoutTree(child, depth + 1, childY);
+                    childY += (child.subtreeHeight || CARD_HEIGHT) + VERTICAL_SPACING;
+                });
+            }
+        }
+
+        function refreshLayout() {
+            computeNodeHeights(rawMarketingTree);
+            const rootTotalHeight = rawMarketingTree.subtreeHeight;
+            layoutTree(rawMarketingTree, 0, -rootTotalHeight / 2);
+        }
+
+        function getVisibleNodes(node, list = []) {
+            list.push(node);
+            if (!node.collapsed && node.children) {
+                node.children.forEach(child => getVisibleNodes(child, list));
+            }
+            return list;
+        }
+
+        function findNodeById(root, id) {
+            if (root.id === id) return root;
+            if (root.children) {
+                for (const child of root.children) {
+                    const found = findNodeById(child, id);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
+        function expandAncestors(targetNode) {
+            function search(current) {
+                if (!current.children) return false;
+                for (const child of current.children) {
+                    if (child === targetNode || search(child)) {
+                        current.collapsed = false;
+                        return true;
+                    }
+                }
+                return false;
+            }
+            search(rawMarketingTree);
+        }
+
+        // =========================================================================
+        // 4. RENDERIZADO EN CANVAS 2D CON FOTONES Y PULSOS NEÓN
+        // =========================================================================
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.arcTo(x + width, y, x + width, y + height, radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.arcTo(x + width, y + height, x, y + height, radius);
+            ctx.lineTo(x + radius, y + height);
+            ctx.arcTo(x, y + height, x, y, radius);
+            ctx.lineTo(x, y + radius);
+            ctx.arcTo(x, y, x + width, y, radius);
+            ctx.closePath();
+        }
+
+        function drawBackground() {
+            ctx.fillStyle = "#020617";
+            ctx.fillRect(0, 0, viewWidth, viewHeight);
+
+            // Rejilla de puntos adaptada al zoom y traslación
+            ctx.save();
+            const gridSize = 40 * transform.scale;
+            const offsetX = transform.x % gridSize;
+            const offsetY = transform.y % gridSize;
+
+            ctx.fillStyle = "rgba(148, 163, 184, 0.08)";
+            for (let x = offsetX; x < viewWidth; x += gridSize) {
+                for (let y = offsetY; y < viewHeight; y += gridSize) {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 1.2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            ctx.restore();
+
+            // Partículas ambientales en coordenadas de mundo
+            ctx.save();
+            ctx.translate(transform.x, transform.y);
+            ctx.scale(transform.scale, transform.scale);
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                if (p.x < -1000) p.x = 2500;
+                if (p.x > 2500) p.x = -1000;
+                if (p.y < -1500) p.y = 1500;
+                if (p.y > 1500) p.y = -1500;
+
+                ctx.fillStyle = `rgba(99, 102, 241, ${p.alpha})`;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.restore();
+        }
+
+        // Curvas Bezier con partículas fotónicas viajeras
+        function drawConnections(node) {
+            if (node.collapsed || !node.children) return;
+
+            const startX = node.x + node.width;
+            const startY = node.y + node.height / 2;
+            const now = Date.now() * 0.001;
+
+            node.children.forEach((child, index) => {
+                const endX = child.x;
+                const endY = child.y + child.height / 2;
+
+                const deltaX = (endX - startX) * 0.55;
+                const cp1x = startX + deltaX;
+                const cp1y = startY;
+                const cp2x = endX - deltaX;
+                const cp2y = endY;
+
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, endX, endY);
+
+                const branchColor = child.color || "#64748b";
+                const isHoveredBranch = (hoveredNode === child || hoveredNode === node || selectedNode === child);
+
+                ctx.strokeStyle = isHoveredBranch ? branchColor : `${branchColor}66`;
+                ctx.lineWidth = isHoveredBranch ? 3.5 : 2;
+                ctx.lineCap = "round";
+                ctx.stroke();
+
+                // FOTÓN DE DATOS / ENERGÍA FLUIDA VIAJANDO A LO LARGO DE LA CURVA
+                const speed = isHoveredBranch ? 0.75 : 0.45;
+                const t = ((now * speed + index * 0.23) % 1);
+
+                const mt = 1 - t;
+                const px = mt * mt * mt * startX + 3 * mt * mt * t * cp1x + 3 * mt * t * t * cp2x + t * t * t * endX;
+                const py = mt * mt * mt * startY + 3 * mt * mt * t * cp1y + 3 * mt * t * t * cp2y + t * t * t * endY;
+
+                ctx.save();
+                ctx.shadowColor = branchColor;
+                ctx.shadowBlur = isHoveredBranch ? 14 : 8;
+                ctx.fillStyle = "#ffffff";
+                ctx.beginPath();
+                ctx.arc(px, py, isHoveredBranch ? 3.5 : 2.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Estela sutil del fotón
+                const tPrev = Math.max(0, t - 0.04);
+                const mtPrev = 1 - tPrev;
+                const pxPrev = mtPrev * mtPrev * mtPrev * startX + 3 * mtPrev * mtPrev * tPrev * cp1x + 3 * mtPrev * tPrev * tPrev * cp2x + tPrev * tPrev * tPrev * endX;
+                const pyPrev = mtPrev * mtPrev * mtPrev * startY + 3 * mtPrev * mtPrev * tPrev * cp1y + 3 * mtPrev * tPrev * tPrev * cp2y + tPrev * tPrev * tPrev * endY;
+
+                ctx.strokeStyle = branchColor;
+                ctx.lineWidth = isHoveredBranch ? 2.5 : 1.5;
+                ctx.beginPath();
+                ctx.moveTo(pxPrev, pyPrev);
+                ctx.lineTo(px, py);
+                ctx.stroke();
+                ctx.restore();
+
+                // Conector circular inicial
+                ctx.fillStyle = branchColor;
+                ctx.beginPath();
+                ctx.arc(startX, startY, 3, 0, Math.PI * 2);
+                ctx.fill();
+
+                drawConnections(child);
+            });
+        }
+
+        // Renderizado de tarjetas con Neón Palpitante y Anillo del Tour
+        function drawNode(node) {
+            const isRoot = node.id === "root";
+            const isHovered = hoveredNode === node;
+            const isSelected = selectedNode === node;
+            const hasChildren = node.children && node.children.length > 0;
+            const isCollapsed = Boolean(node.collapsed);
+            const isCurrentTourNode = (isTourActive && tourMilestoneIds[tourIndex] === node.id);
+
+            // Evaluación de búsqueda
+            let isMatch = true;
+            let isDimmed = false;
+            if (searchTerm) {
+                const hay = `${node.title} ${node.category} ${node.description} ${(node.keyPoints || []).join(' ')}`.toLowerCase();
+                isMatch = hay.includes(searchTerm);
+                isDimmed = !isMatch;
+            }
+
+            ctx.save();
+            if (isDimmed) {
+                ctx.globalAlpha = 0.22;
+            }
+
+            // Anillo exterior de pulso durante el Tour Guiado
+            if (isCurrentTourNode) {
+                const ringT = (Date.now() * 0.002) % 1;
+                const expandPx = ringT * 12;
+                ctx.save();
+                ctx.strokeStyle = node.color || "#6366f1";
+                ctx.lineWidth = 2.5 * (1 - ringT);
+                ctx.globalAlpha = 1 - ringT;
+                roundRect(ctx, node.x - expandPx, node.y - expandPx, node.width + expandPx * 2, node.height + expandPx * 2, 16);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // Aura de Neón Palpitante
+            if (isSelected || isHovered || isCurrentTourNode) {
+                const pulse = 18 + Math.sin(Date.now() * 0.006) * 7;
+                ctx.shadowColor = node.color || "#6366f1";
+                ctx.shadowBlur = pulse;
+            } else {
+                ctx.shadowColor = "rgba(0,0,0,0.45)";
+                ctx.shadowBlur = 12;
+            }
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 6;
+
+            // Fondo de la tarjeta
+            if (isRoot) {
+                const grad = ctx.createLinearGradient(node.x, node.y, node.x + node.width, node.y + node.height);
+                grad.addColorStop(0, "#312e81");
+                grad.addColorStop(1, "#4c1d95");
+                ctx.fillStyle = grad;
+            } else {
+                ctx.fillStyle = (isSelected || isCurrentTourNode) ? "#1e293b" : (isHovered ? "#162032" : "#0f172a");
+            }
+
+            roundRect(ctx, node.x, node.y, node.width, node.height, 14);
+            ctx.fill();
+
+            // Borde
+            ctx.shadowColor = "transparent";
+            ctx.lineWidth = (isSelected || isCurrentTourNode) ? 2.8 : (isHovered ? 2 : 1.2);
+            ctx.strokeStyle = (isSelected || isCurrentTourNode)
+                ? "#ffffff"
+                : (isHovered ? (node.color || "#818cf8") : (isRoot ? "#818cf8" : "rgba(51, 65, 85, 0.8)"));
+            ctx.stroke();
+
+            // Franja de acento de color
+            ctx.fillStyle = node.color || "#6366f1";
+            ctx.beginPath();
+            roundRect(ctx, node.x + 3, node.y + 12, 4.5, node.height - 24, 2.5);
+            ctx.fill();
+
+            // Categoría / Época
+            ctx.font = "bold 9px 'JetBrains Mono', monospace";
+            ctx.fillStyle = node.color || "#818cf8";
+            ctx.textBaseline = "top";
+            const catText = (node.category || "HITO").toUpperCase();
+            ctx.fillText(catText, node.x + 18, node.y + 14);
+
+            // Título
+            ctx.font = isRoot ? "bold 13px 'Plus Jakarta Sans', sans-serif" : "600 12px 'Plus Jakarta Sans', sans-serif";
+            ctx.fillStyle = "#f8fafc";
+
+            const maxTextWidth = node.width - (hasChildren ? 56 : 30);
+            let displayTitle = node.title;
+            if (ctx.measureText(displayTitle).width > maxTextWidth) {
+                while (ctx.measureText(displayTitle + "...").width > maxTextWidth && displayTitle.length > 0) {
+                    displayTitle = displayTitle.slice(0, -1);
+                }
+                displayTitle += "...";
+            }
+            ctx.fillText(displayTitle, node.x + 18, node.y + 32);
+
+            // Subtítulo / Minutaje
+            ctx.font = "400 10px 'Plus Jakarta Sans', sans-serif";
+            ctx.fillStyle = "#94a3b8";
+            const periodText = node.period || "";
+            ctx.fillText(periodText, node.x + 18, node.y + 52);
+
+            // Botón interactivo (+) / (-)
+            if (hasChildren && node.toggleBtn) {
+                const btn = node.toggleBtn;
+                ctx.beginPath();
+                ctx.arc(btn.x, btn.y, btn.radius, 0, Math.PI * 2);
+                ctx.fillStyle = isHovered ? "#334155" : "#1e293b";
+                ctx.fill();
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = "rgba(148, 163, 184, 0.4)";
+                ctx.stroke();
+
+                ctx.strokeStyle = "#e2e8f0";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(btn.x - 4.5, btn.y);
+                ctx.lineTo(btn.x + 4.5, btn.y);
+                if (isCollapsed) {
+                    ctx.moveTo(btn.x, btn.y - 4.5);
+                    ctx.lineTo(btn.x, btn.y + 4.5);
+                }
+                ctx.stroke();
+            }
+
+            ctx.restore();
+
+            if (!node.collapsed && node.children) {
+                node.children.forEach(child => drawNode(child));
+            }
+        }
+
+        // Render Loop con Física Suave (Spring LERP)
+        function renderMainCanvas() {
+            if (!isDragging) {
+                transform.x += (targetTransform.x - transform.x) * 0.12;
+                transform.y += (targetTransform.y - transform.y) * 0.12;
+                transform.scale += (targetTransform.scale - transform.scale) * 0.12;
+            }
+
+            drawBackground();
+
+            ctx.save();
+            ctx.translate(transform.x, transform.y);
+            ctx.scale(transform.scale, transform.scale);
+
+            drawConnections(rawMarketingTree);
+            drawNode(rawMarketingTree);
+
+            ctx.restore();
+
+            renderMinimap();
+            requestAnimationFrame(renderMainCanvas);
+        }
+
+        // =========================================================================
+        // 5. MINIMAPA DE NAVEGACIÓN
+        // =========================================================================
+        function renderMinimap() {
+            minimapCtx.fillStyle = "#090d16";
+            minimapCtx.fillRect(0, 0, minimapCanvas.width, minimapCanvas.height);
+
+            const nodes = getVisibleNodes(rawMarketingTree);
+            if (nodes.length === 0) return;
+
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            nodes.forEach(n => {
+                minX = Math.min(minX, n.x);
+                maxX = Math.max(maxX, n.x + n.width);
+                minY = Math.min(minY, n.y);
+                maxY = Math.max(maxY, n.y + n.height);
+            });
+
+            const padding = 150;
+            const worldW = (maxX - minX) + padding * 2;
+            const worldH = (maxY - minY) + padding * 2;
+            const scaleX = minimapCanvas.width / worldW;
+            const scaleY = minimapCanvas.height / worldH;
+            const miniScale = Math.min(scaleX, scaleY);
+
+            const offsetX = (minimapCanvas.width - worldW * miniScale) / 2 - (minX - padding) * miniScale;
+            const offsetY = (minimapCanvas.height - worldH * miniScale) / 2 - (minY - padding) * miniScale;
+
+            nodes.forEach(n => {
+                const mx = n.x * miniScale + offsetX;
+                const my = n.y * miniScale + offsetY;
+                const mw = Math.max(4, n.width * miniScale);
+                const mh = Math.max(2, n.height * miniScale);
+
+                minimapCtx.fillStyle = n.color || "#6366f1";
+                minimapCtx.fillRect(mx, my, mw, mh);
+            });
+
+            const viewWorldLeft = -transform.x / transform.scale;
+            const viewWorldTop = -transform.y / transform.scale;
+            const viewWorldWidth = viewWidth / transform.scale;
+            const viewWorldHeight = viewHeight / transform.scale;
+
+            const vx = viewWorldLeft * miniScale + offsetX;
+            const vy = viewWorldTop * miniScale + offsetY;
+            const vw = viewWorldWidth * miniScale;
+            const vh = viewWorldHeight * miniScale;
+
+            minimapCtx.strokeStyle = "#818cf8";
+            minimapCtx.lineWidth = 1.5;
+            minimapCtx.strokeRect(vx, vy, vw, vh);
+            minimapCtx.fillStyle = "rgba(99, 102, 241, 0.15)";
+            minimapCtx.fillRect(vx, vy, vw, vh);
+        }
+
+        // =========================================================================
+        // 6. CONTROL DE CÁMARA Y NAVEGACIÓN SUAVE (FOCUS ON NODE)
+        // =========================================================================
+        function screenToWorld(sx, sy) {
+            return {
+                x: (sx - transform.x) / transform.scale,
+                y: (sy - transform.y) / transform.scale
+            };
+        }
+
+        function findNodeAt(worldX, worldY) {
+            const nodes = getVisibleNodes(rawMarketingTree);
+            for (let i = nodes.length - 1; i >= 0; i--) {
+                const n = nodes[i];
+                if (worldX >= n.x && worldX <= n.x + n.width &&
+                    worldY >= n.y && worldY <= n.y + n.height) {
+                    return n;
+                }
+            }
+            return null;
+        }
+
+        function isInsideToggleBtn(node, worldX, worldY) {
+            if (!node || !node.toggleBtn) return false;
+            const dx = worldX - node.toggleBtn.x;
+            const dy = worldY - node.toggleBtn.y;
+            return (dx * dx + dy * dy) <= (node.toggleBtn.radius * node.toggleBtn.radius * 1.5);
+        }
+
+        function focusOnNode(node, zoom = 1.0) {
+            if (!node) return;
+            expandAncestors(node);
+            refreshLayout();
+
+            const targetZoom = Math.min(Math.max(0.65, zoom), 1.6);
+            targetTransform.scale = targetZoom;
+
+            // Desfasar a la izquierda si el drawer está abierto en pantallas grandes
+            const screenTargetX = (window.innerWidth >= 1024) ? (viewWidth * 0.38) : (viewWidth * 0.5);
+            targetTransform.x = screenTargetX - (node.x + node.width / 2) * targetZoom;
+            targetTransform.y = (viewHeight * 0.5) - (node.y + node.height / 2) * targetZoom;
+
+            document.getElementById("zoomLevelText").textContent = `${Math.round(targetTransform.scale * 100)}%`;
+            playTone(520, 'sine', 0.08, 0.04);
+        }
+
+        function applyZoom(factor, centerX, centerY) {
+            const newScale = Math.min(Math.max(0.18, targetTransform.scale * factor), 2.4);
+            const ratio = newScale / targetTransform.scale;
+
+            targetTransform.x = centerX - (centerX - targetTransform.x) * ratio;
+            targetTransform.y = centerY - (centerY - targetTransform.y) * ratio;
+            targetTransform.scale = newScale;
+
+            document.getElementById("zoomLevelText").textContent = `${Math.round(targetTransform.scale * 100)}%`;
+            playTone(400, 'sine', 0.05, 0.03);
+        }
+
+        function resetCamera() {
+            targetTransform.scale = 0.82;
+            targetTransform.x = 120;
+            targetTransform.y = viewHeight / 2;
+            document.getElementById("zoomLevelText").textContent = `${Math.round(targetTransform.scale * 100)}%`;
+            playTone(350, 'sine', 0.1, 0.04);
+        }
+
+        // Eventos de Ratón
+        canvas.addEventListener("mousedown", (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            const world = screenToWorld(mouseX, mouseY);
+
+            const target = findNodeAt(world.x, world.y);
+
+            if (target && isInsideToggleBtn(target, world.x, world.y)) {
+                target.collapsed = !target.collapsed;
+                refreshLayout();
+                playTone(480, 'sine', 0.06, 0.04);
+                return;
+            }
+
+            if (target) {
+                selectedNode = target;
+                focusOnNode(target, 1.05);
+                openDetailDrawer(target);
+                playTone(580, 'sine', 0.09, 0.05);
+                return;
+            }
+
+            isDragging = true;
+            dragStart.x = mouseX - transform.x;
+            dragStart.y = mouseY - transform.y;
+            targetTransform.x = transform.x;
+            targetTransform.y = transform.y;
+            canvas.classList.replace("cursor-grab", "cursor-grabbing");
+        });
+
+        window.addEventListener("mousemove", (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            if (isDragging) {
+                transform.x = mouseX - dragStart.x;
+                transform.y = mouseY - dragStart.y;
+                targetTransform.x = transform.x;
+                targetTransform.y = transform.y;
+                return;
+            }
+
+            const world = screenToWorld(mouseX, mouseY);
+            const hit = findNodeAt(world.x, world.y);
+            hoveredNode = hit;
+
+            if (hit) {
+                canvas.style.cursor = "pointer";
+            } else {
+                canvas.style.cursor = "grab";
+            }
+        });
+
+        window.addEventListener("mouseup", () => {
+            isDragging = false;
+            canvas.classList.replace("cursor-grabbing", "cursor-grab");
+        });
+
+        canvas.addEventListener("wheel", (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            const zoomFactor = e.deltaY < 0 ? 1.15 : 0.85;
+            applyZoom(zoomFactor, mouseX, mouseY);
+        }, { passive: false });
+
+        // Touch Móvil
+        let touchStartDist = 0;
+        let touchStartMid = { x: 0, y: 0 };
+
+        canvas.addEventListener("touchstart", (e) => {
+            if (e.touches.length === 1) {
+                const t = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                const touchX = t.clientX - rect.left;
+                const touchY = t.clientY - rect.top;
+                const world = screenToWorld(touchX, touchY);
+
+                const target = findNodeAt(world.x, world.y);
+                if (target && isInsideToggleBtn(target, world.x, world.y)) {
+                    target.collapsed = !target.collapsed;
+                    refreshLayout();
+                    return;
+                }
+                if (target) {
+                    selectedNode = target;
+                    focusOnNode(target, 1.0);
+                    openDetailDrawer(target);
+                    return;
+                }
+
+                isDragging = true;
+                dragStart.x = touchX - transform.x;
+                dragStart.y = touchY - transform.y;
+                targetTransform.x = transform.x;
+                targetTransform.y = transform.y;
+            } else if (e.touches.length === 2) {
+                isDragging = false;
+                const t1 = e.touches[0];
+                const t2 = e.touches[1];
+                const dx = t1.clientX - t2.clientX;
+                const dy = t1.clientY - t2.clientY;
+                touchStartDist = Math.hypot(dx, dy);
+                touchStartMid = {
+                    x: (t1.clientX + t2.clientX) / 2,
+                    y: (t1.clientY + t2.clientY) / 2
+                };
+            }
+        }, { passive: true });
+
+        canvas.addEventListener("touchmove", (e) => {
+            if (e.touches.length === 1 && isDragging) {
+                const t = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                transform.x = (t.clientX - rect.left) - dragStart.x;
+                transform.y = (t.clientY - rect.top) - dragStart.y;
+                targetTransform.x = transform.x;
+                targetTransform.y = transform.y;
+            } else if (e.touches.length === 2 && touchStartDist > 0) {
+                const t1 = e.touches[0];
+                const t2 = e.touches[1];
+                const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+                const factor = dist / touchStartDist;
+                applyZoom(factor, touchStartMid.x, touchStartMid.y);
+                touchStartDist = dist;
+            }
+        }, { passive: true });
+
+        canvas.addEventListener("touchend", () => {
+            isDragging = false;
+            touchStartDist = 0;
+        });
+
+        // =========================================================================
+        // 7. PANEL LATERAL (DRAWER) DE DETALLES CON VÍNCULO AL VIDEO
+        // =========================================================================
+        const drawer = document.getElementById("canvasDetailDrawer");
+        const drawerBadge = document.getElementById("drawerBadge");
+        const drawerTitle = document.getElementById("drawerTitle");
+        const drawerCategory = document.getElementById("drawerCategory");
+        const drawerPeriod = document.getElementById("drawerPeriod");
+        const drawerDescription = document.getElementById("drawerDescription");
+        const drawerKeyPoints = document.getElementById("drawerKeyPoints");
+        const drawerQuoteBox = document.getElementById("drawerQuoteBox");
+        const drawerQuote = document.getElementById("drawerQuote");
+        const drawerVideoLink = document.getElementById("drawerVideoLink");
+
+        function openDetailDrawer(node) {
+            drawerTitle.textContent = node.title;
+            drawerCategory.textContent = node.category || "Hito Histórico";
+            drawerPeriod.textContent = node.period || "Documental de Marketing";
+            drawerDescription.textContent = node.description || "Sin descripción disponible.";
+
+            drawerBadge.textContent = node.category || "NODO";
+            drawerBadge.style.color = node.color || "#818cf8";
+            drawerBadge.style.borderColor = (node.color || "#818cf8") + "55";
+
+            drawerKeyPoints.innerHTML = "";
+            if (node.keyPoints && node.keyPoints.length > 0) {
+                node.keyPoints.forEach(pt => {
+                    const li = document.createElement("li");
+                    li.className = "flex items-start gap-2 bg-slate-950/40 p-2.5 rounded-lg border border-slate-800/80";
+                    li.innerHTML = `
+                        <span class="text-indigo-400 mt-0.5 text-xs">◆</span>
+                        <span class="text-xs text-slate-300 leading-snug">${pt}</span>
+                    `;
+                    drawerKeyPoints.appendChild(li);
+                });
+            } else {
+                drawerKeyPoints.innerHTML = `<li class="text-xs text-slate-500 italic">No hay puntos secundarios registrados.</li>`;
+            }
+
+            if (node.quote) {
+                drawerQuoteBox.classList.remove("hidden");
+                drawerQuote.textContent = `"${node.quote}"`;
+            } else {
+                drawerQuoteBox.classList.add("hidden");
+            }
+
+            // Enlace directo al documental en YouTube
+            if (drawerVideoLink) {
+                if (node.videoTime !== undefined && node.videoTime > 0) {
+                    drawerVideoLink.href = `https://youtu.be/XBywDSGuKAw?t=${node.videoTime}`;
+                } else {
+                    drawerVideoLink.href = "https://youtu.be/XBywDSGuKAw";
+                }
+                drawerVideoLink.querySelector("span").textContent = "Ver en YouTube";
+            }
+
+            drawer.classList.remove("translate-x-full");
+        }
+
+        document.getElementById("closeDetailDrawerBtn").addEventListener("click", () => {
+            drawer.classList.add("translate-x-full");
+            selectedNode = null;
+            playTone(300, 'sine', 0.05, 0.02);
+        });
+
+        // =========================================================================
+        // 8. MODO TOUR GUIADO Y PRESENTACIÓN CRONOLÓGICA
+        // =========================================================================
+        const tourMilestoneIds = [
+            "root",
+            "era_antigua",
+            "hapu_tejedor",
+            "pompeya_nicias",
+            "era_medieval",
+            "poste_barbero",
+            "imprenta_gutenberg",
+            "era_cientifica",
+            "fred_clark",
+            "posguerra_operaciones",
+            "era_4ps_kotler",
+            "mccarthy_4ps",
+            "philip_kotler_hito",
+            "era_digital_search",
+            "backrub_google",
+            "social_media_bigdata",
+            "era_creadores_ia",
+            "caso_mrbeast_eco",
+            "ia_reflexion_final"
+        ];
+
+        let tourIndex = 0;
+        let isTourActive = false;
+        let isTourAutoplaying = false;
+        let tourInterval = null;
+
+        const tourBar = document.getElementById("tourBar");
+        const btnTourPlayPause = document.getElementById("btnTourPlayPause");
+        const tourPlayIcon = document.getElementById("tourPlayIcon");
+        const tourPlayText = document.getElementById("tourPlayText");
+        const btnTourPrev = document.getElementById("btnTourPrev");
+        const btnTourNext = document.getElementById("btnTourNext");
+        const tourStepIndicator = document.getElementById("tourStepIndicator");
+        const btnCloseTour = document.getElementById("btnCloseTour");
+        const btnHeaderTour = document.getElementById("btnHeaderTour");
+
+        function updateTourStep(index) {
+            if (index < 0) index = 0;
+            if (index >= tourMilestoneIds.length) index = tourMilestoneIds.length - 1;
+            tourIndex = index;
+
+            const nodeId = tourMilestoneIds[tourIndex];
+            const node = findNodeById(rawMarketingTree, nodeId);
+
+            if (node) {
+                selectedNode = node;
+                focusOnNode(node, 1.08);
+                openDetailDrawer(node);
+                playTone(620, 'sine', 0.12, 0.06);
+
+                tourStepIndicator.textContent = `${tourIndex + 1}/${tourMilestoneIds.length}: ${node.title.slice(0, 18)}...`;
+            }
+
+            btnTourPrev.disabled = (tourIndex === 0);
+            btnTourNext.disabled = (tourIndex === tourMilestoneIds.length - 1);
+        }
+
+        function startTourAutoPlay() {
+            isTourActive = true;
+            isTourAutoplaying = true;
+            tourBar.classList.remove("hidden");
+            tourPlayIcon.className = "ph-bold ph-pause text-xs";
+            tourPlayText.textContent = "Pausar";
+
+            if (tourInterval) clearInterval(tourInterval);
+            tourInterval = setInterval(() => {
+                if (tourIndex < tourMilestoneIds.length - 1) {
+                    updateTourStep(tourIndex + 1);
+                } else {
+                    pauseTourAutoPlay();
+                }
+            }, 7500);
+        }
+
+        function pauseTourAutoPlay() {
+            isTourAutoplaying = false;
+            tourPlayIcon.className = "ph-bold ph-play text-xs";
+            tourPlayText.textContent = "Reanudar";
+            if (tourInterval) {
+                clearInterval(tourInterval);
+                tourInterval = null;
+            }
+        }
+
+        btnTourPlayPause.addEventListener("click", () => {
+            if (isTourAutoplaying) {
+                pauseTourAutoPlay();
+            } else {
+                startTourAutoPlay();
+            }
+        });
+
+        btnTourPrev.addEventListener("click", () => {
+            pauseTourAutoPlay();
+            updateTourStep(tourIndex - 1);
+        });
+
+        btnTourNext.addEventListener("click", () => {
+            pauseTourAutoPlay();
+            updateTourStep(tourIndex + 1);
+        });
+
+        btnCloseTour.addEventListener("click", () => {
+            pauseTourAutoPlay();
+            isTourActive = false;
+            selectedNode = null;
+            tourBar.classList.add("hidden");
+        });
+
+        btnHeaderTour.addEventListener("click", () => {
+            tourBar.classList.remove("hidden");
+            updateTourStep(0);
+            startTourAutoPlay();
+        });
+
+        // =========================================================================
+        // 9. PÍLDORAS INTERACTIVAS DE ÉPOCA Y BÚSQUEDA DINÁMICA
+        // =========================================================================
+        document.querySelectorAll(".era-pill").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const eraId = btn.dataset.era;
+                const node = findNodeById(rawMarketingTree, eraId);
+                if (node) {
+                    node.collapsed = false;
+                    refreshLayout();
+                    selectedNode = node;
+                    focusOnNode(node, 0.95);
+                    openDetailDrawer(node);
+
+                    // Resaltar visualmente la píldora activa
+                    document.querySelectorAll(".era-pill").forEach(p => p.classList.remove("bg-indigo-600/30", "text-white"));
+                    btn.classList.add("bg-indigo-600/30", "text-white");
+                    playTone(560, 'sine', 0.1, 0.05);
+                }
+            });
+        });
+
+        // Buscador interactivo en canvas con enfoque automático
+        const searchInput = document.getElementById("canvasSearchInput");
+        searchInput.addEventListener("input", (e) => {
+            searchTerm = e.target.value.toLowerCase().trim();
+        });
+
+        searchInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && searchTerm) {
+                const allNodes = getVisibleNodes(rawMarketingTree);
+                const match = allNodes.find(n => {
+                    const text = `${n.title} ${n.category} ${n.description}`.toLowerCase();
+                    return text.includes(searchTerm);
+                });
+                if (match) {
+                    selectedNode = match;
+                    focusOnNode(match, 1.1);
+                    openDetailDrawer(match);
+                }
+            }
+        });
+
+        // =========================================================================
+        // 10. CONTROLES GENERALES, MODALES Y EXPORTACIÓN
+        // =========================================================================
+        document.getElementById("btnResetView").addEventListener("click", resetCamera);
+
+        document.getElementById("zoomInBtn").addEventListener("click", () => {
+            applyZoom(1.25, viewWidth / 2, viewHeight / 2);
+        });
+
+        document.getElementById("zoomOutBtn").addEventListener("click", () => {
+            applyZoom(0.8, viewWidth / 2, viewHeight / 2);
+        });
+
+        function setCollapseRecursive(node, collapsed) {
+            if (node !== rawMarketingTree) {
+                node.collapsed = collapsed;
+            }
+            if (node.children) {
+                node.children.forEach(c => setCollapseRecursive(c, collapsed));
+            }
+        }
+
+        document.getElementById("expandAllNodesBtn").addEventListener("click", () => {
+            setCollapseRecursive(rawMarketingTree, false);
+            refreshLayout();
+            playTone(450, 'sine', 0.08, 0.03);
+        });
+
+        document.getElementById("collapseAllNodesBtn").addEventListener("click", () => {
+            if (rawMarketingTree.children) {
+                rawMarketingTree.children.forEach(c => setCollapseRecursive(c, true));
+            }
+            refreshLayout();
+            playTone(350, 'sine', 0.08, 0.03);
+        });
+
+        const helpModal = document.getElementById("canvasHelpModal");
+        document.getElementById("btnInfoModal").addEventListener("click", () => helpModal.classList.remove("hidden"));
+        document.getElementById("closeHelpModalBtn").addEventListener("click", () => helpModal.classList.add("hidden"));
+        document.getElementById("gotItHelpBtn").addEventListener("click", () => helpModal.classList.add("hidden"));
+
+        // Exportar Canvas como Imagen PNG
+        document.getElementById("btnExportPng").addEventListener("click", () => {
+            const exportCanvas = document.createElement("canvas");
+            exportCanvas.width = canvas.width;
+            exportCanvas.height = canvas.height;
+            const expCtx = exportCanvas.getContext("2d");
+
+            expCtx.drawImage(canvas, 0, 0);
+
+            const link = document.createElement("a");
+            link.download = "mapa_mental_historia_del_marketing.png";
+            link.href = exportCanvas.toDataURL("image/png");
+            link.click();
+            playTone(700, 'triangle', 0.15, 0.05);
+        });
+
+        function resizeCanvas() {
+            viewWidth = window.innerWidth;
+            viewHeight = window.innerHeight - 64;
+            canvas.width = viewWidth * window.devicePixelRatio;
+            canvas.height = viewHeight * window.devicePixelRatio;
+            canvas.style.width = `${viewWidth}px`;
+            canvas.style.height = `${viewHeight}px`;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+
+        window.addEventListener("resize", resizeCanvas);
+
+        // Inicialización
+        window.onload = function () {
+            resizeCanvas();
+            refreshLayout();
+            resetCamera();
+            requestAnimationFrame(renderMainCanvas);
+        };
+    </script>
+</body>
+
+</html>
